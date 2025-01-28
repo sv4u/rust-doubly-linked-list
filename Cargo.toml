@@ -1,5 +1,5 @@
 [package]
-name = "rust-doubly-linked-list"
+name = "doubly-linked-list"
 version = "0.1.0"
 edition = "2021"
 
