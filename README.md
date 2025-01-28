@@ -45,36 +45,51 @@ A doubly-linked list structure that manages its elements safely.
 #### Methods
 
 - **`new()`**: Creates a new, empty list.
+
 ```rust
 let mut list = DoublyLinkedList::new();
 ```
+
 - **`append(value: T)`**: Adds a value to the end of the list.
+
 ```rust
 list.append(10);
 ```
+
 - **`prepend(value: T)`**: Adds a value to the beginning of the list.
+
 ```rust
 list.prepend(5);
 ```
+
 - **`pop_front() -> Option<T>`**: Removes the front element and returns its value, if any.
+
 ```rust
 let front = list.pop_front();
 ```
+
 - **`pop_back() -> Option<T>`**: Removes the last element and returns its value, if any.
+
 ```rust
 let back = list.pop_back();
 ```
+
 - **`len() -> usize`**: Returns the number of elements in the list.
+
 ```rust
 let size = list.len();
 ```
+
 - **`is_empty() -> bool`**: Checks whether the list is empty.
+
 ```rust
 assert!(list.is_empty());
 ```
 
 #### Iteration
+
 The library supports iteration by consuming the list into an iterator:
+
 ```rust
 let mut list = DoublyLinkedList::new();
 list.append(1);
@@ -93,12 +108,15 @@ assert_eq!(iter.next(), None);
 ## Design Details
 
 ### Memory Safety
+
 This implementation achieves memory safety by adhering to Rust's ownership model:
+
 - **Heap Allocation**: Nodes are created using `Box`, ensuring they are heap-allocated and deallocated when no longer needed.
 - **Pointer Management**: All raw pointers (`*mut Node<T>`) are carefully maintained to avoid invalid dereferencing.
 - **Drop Implementation**: The `Drop` trait ensures all nodes are properly deallocated when the list is dropped.
 
 ### Why Not Use `Rc` and `RefCell`?
+
 To demonstrate low-level control and avoid runtime overhead, this implementation avoids `Rc` (reference counting) and `RefCell` (runtime borrow checking). Instead, it relies on raw pointers with strict safety checks.
 
 ---
@@ -112,6 +130,7 @@ cargo test
 ```
 
 ### What is Tested?
+
 - **Basic Operations**: Append, prepend, pop from the front and back.
 - **Edge Cases**: Operations on empty lists, mixed operations.
 - **Iterators**: Consuming and traversing the list using iterators.
@@ -121,4 +140,3 @@ cargo test
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
-
