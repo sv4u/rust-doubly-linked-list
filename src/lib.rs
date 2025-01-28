@@ -10,7 +10,7 @@
 ///
 /// ## Example
 /// ```rust
-/// use rust_doubly_linked_list::DoublyLinkedList;
+/// use doubly_linked_list::DoublyLinkedList;
 ///
 /// fn main() {
 ///     let mut list = DoublyLinkedList::new();
