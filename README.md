@@ -106,6 +106,6 @@ This implementation avoids unnecessary heap allocations by directly managing mem
 
 - O(n) for traversal.
 
-Conclusion
+## Conclusion
 
 This doubly-linked list implementation balances manual memory management with safety by using raw pointers carefully. By avoiding reference counting and interior mutability, it provides a fast and efficient data structure while maintaining Rust’s core safety guarantees.
