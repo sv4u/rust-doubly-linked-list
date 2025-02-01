@@ -1,16 +1,18 @@
-# Doubly-Linked List in Rust
+# Pointer-Based Doubly-Linked List in Rust
 
-## Overview
-
-This Rust library provides an implementation of a doubly-linked list using raw pointers (`*mut T`) while ensuring memory safety through careful pointer management. Unlike reference-counted (`Rc<RefCell<T>>`) approaches, this implementation avoids runtime borrow-checking overhead while maintaining efficient insertions, deletions, and traversal.
+This library provides an implementation of a doubly-linked list in Rust using raw pointers. It includes safety measures to minimize common pitfalls associated with raw pointers, such as dangling pointers and memory leaks. The implementation also includes an iterator for easy traversal of elements.
 
 ## Features
 
-- Append elements to the back of the list
-- Prepend elements to the front of the list
-- Remove elements from both ends safely
-- Iterate over elements efficiently
-- Memory safety ensured through strict pointer management
+- Append elements to the list
+
+- Prepend elements to the list
+
+- Remove elements from the front or back
+
+- Iterate through the list using Rust's Iterator trait
+
+- Explicit memory management for performance optimization
 
 ## Example Usage
 
@@ -20,92 +22,70 @@ use doubly_linked_list::DoublyLinkedList;
 fn main() {
     let mut list = DoublyLinkedList::new();
     list.append(1);
-    list.append(2);
+    list.prepend(2);
     list.append(3);
+    list.prepend(4);
 
-    while let Some(value) = list.pop_front() {
+    for value in &list {
         println!("{}", value);
     }
 }
 ```
 
-Design Choices
+## Implementation Details
 
-1. Use of Raw Pointers (`*mut T`)
+### Data Structure
 
-    Rust’s ownership model does not easily allow a doubly-linked list to be implemented with references (&T or &mut T) due to the borrowing restrictions.
+The `DoublyLinkedList<T>` consists of nodes that are connected using raw pointers. Each node contains:
 
-    - Reason: Each node in a doubly-linked list must be linked to both the next and previous nodes, creating a cyclic ownership structure.
+- A value: `T`
 
-    - Why raw pointers? Using *mut T allows manual control over node relationships without requiring reference counting (Rc) or runtime borrow checking (RefCell).
+- A prev pointer to the previous node
 
-2. Memory Safety Mechanisms
+- A next pointer to the next node
 
-    - To ensure memory safety while using raw pointers:
+### Memory Management
 
-    - Node allocation uses `Box<T>`, ensuring that nodes are heap-allocated and properly freed.
+- Nodes are allocated on the heap using `Box::into_raw`.
 
-    - `Box::into_raw()` and `Box::from_raw()` convert between owned and raw pointers safely.
+- When a node is removed, it is safely deallocated using `Box::from_raw`.
 
-    - No dangling pointers: When a node is removed, its memory is freed properly.
+- The `Drop` trait ensures all nodes are properly deallocated when the list goes out of scope.
 
-    - No use-after-free: The list ensures nodes are accessed only when they are valid.
+### Iterators
 
-3. Drop Implementation for Cleanup
+The library implements:
 
-    Rust does not automatically free memory when using raw pointers. To avoid leaks, a custom Drop implementation ensures all nodes are deallocated when the list goes out of scope:
+- `Iterator` for forward traversal.
 
-    ```{rust}
-    impl<T> Drop for DoublyLinkedList<T> {
-        fn drop(&mut self) {
-            while self.pop_front().is_some() {}
-        }
-    }
-    ```
+- `IntoIterator` for consuming iteration.
 
-4. Iterator Implementation
+### Safety Considerations
 
-    To allow idiomatic Rust iteration, the list implements IntoIterator:
+- Raw pointers (`*mut T`) are used instead of smart pointers.
 
-    ```{rust}
-    impl<T> IntoIterator for DoublyLinkedList<T> {
-        type Item = T;
-        type IntoIter = IntoIter<T>;
+- Safety checks are implemented to ensure proper handling of pointers.
 
-        fn into_iter(self) -> Self::IntoIter {
-            IntoIter(self)
-        }
-    }
-    ```
+- No null pointer dereferencing or double frees occur.
 
-    This allows usage like:
+## Running Tests
 
-    ```{rust}
-    for value in list.into_iter() {
-        println!("{}", value);
-    }
-    ```
+The implementation includes unit tests to verify correctness:
 
-## Safety Considerations
+```{bash}
+cargo test
+```
 
-While raw pointers are inherently unsafe, this implementation ensures safety by:
+## Why Use Raw Pointers?
 
-- Keeping ownership clear: Nodes are created with `Box<T>` and converted to raw pointers only when necessary.
+Raw pointers are used to avoid the overhead of smart pointers (`Rc`, `RefCell`) and to provide fine-grained control over memory allocation and deallocation. This ensures:
 
-- Enforcing proper deallocation: Nodes are freed as soon as they are removed, avoiding memory leaks.
+- Better performance by avoiding reference counting overhead
 
-- Preventing double frees: The list owns all nodes exclusively.
+- Explicit memory management, which is useful for low-level programming
 
-- No undefined behavior: All pointer dereferences are done within unsafe blocks with strict checks.
+- Learning experience for understanding Rust's ownership model
 
-Performance Considerations
+## License
 
-This implementation avoids unnecessary heap allocations by directly managing memory. The lack of `Rc` and `RefCell` ensures efficient, low-latency operations compared to other approaches. The time complexity remains:
-
-- O(1) for insertions and deletions at either end.
-
-- O(n) for traversal.
-
-## Conclusion
-
-This doubly-linked list implementation balances manual memory management with safety by using raw pointers carefully. By avoiding reference counting and interior mutability, it provides a fast and efficient data structure while maintaining Rust’s core safety guarantees.
+This project is licensed under the MIT License.
