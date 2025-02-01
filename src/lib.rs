@@ -20,13 +20,15 @@
 ///     list.append(3);
 ///     list.prepend(4);
 ///
+///     for value in &list {
+///         println!("{}", value);
+///     }
 /// }
 /// ```
 use std::ptr;
 
 /// Represents a node in the doubly-linked list.
 struct Node<T> {
-    #[allow(dead_code)]
     value: T,
     prev: *mut Node<T>,
     next: *mut Node<T>,
@@ -113,6 +115,47 @@ impl<T> Drop for DoublyLinkedList<T> {
     }
 }
 
+/// Iterator for the doubly-linked list.
+pub struct Iter<'a, T> {
+    current: *mut Node<T>,
+    _marker: std::marker::PhantomData<&'a T>,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        unsafe {
+            if self.current.is_null() {
+                None
+            } else {
+                let node = &*self.current;
+                self.current = node.next;
+                Some(&node.value)
+            }
+        }
+    }
+}
+
+/// Allows the list to be iterated over.
+impl<T> DoublyLinkedList<T> {
+    pub fn iter(&self) -> Iter<T> {
+        Iter {
+            current: self.head,
+            _marker: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<'a, T> IntoIterator for &'a DoublyLinkedList<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -140,5 +183,19 @@ mod tests {
         let list: DoublyLinkedList<i32> = DoublyLinkedList::new();
         assert!(list.is_empty());
         assert_eq!(list.len(), 0);
+    }
+
+    #[test]
+    fn test_iteration() {
+        let mut list = DoublyLinkedList::new();
+        list.append(1);
+        list.append(2);
+        list.append(3);
+
+        let mut iter = list.iter();
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), None);
     }
 }
