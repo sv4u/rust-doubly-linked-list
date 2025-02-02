@@ -88,4 +88,4 @@ Raw pointers are used to avoid the overhead of smart pointers (`Rc`, `RefCell`) 
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
